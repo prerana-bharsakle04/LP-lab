@@ -1,0 +1,106 @@
+chit12:expertsys(lp)
+
+pip install yfinance --user
+
+
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import yfinance as yf
+google = yf.Ticker("GOOG")
+
+
+
+
+df = google.history(period='1d', interval="1m")
+print(df.head())
+
+
+
+df = google.history(period='1d', interval="1m")
+df = df[['Low']]
+df.head()
+
+
+df['date'] = pd.to_datetime(df.index).time
+df.set_index('date', inplace=True)
+df.head()
+
+
+X = df.index.values
+y = df['Low'].values
+# The split point is the 10% of the dataframe length
+offset = int(0.10*len(df))
+X_train = X[:-offset]
+y_train = y[:-offset]
+X_test = X[-offset:]
+y_test = y[-offset:]
+
+
+
+plt.plot(range(0,len(y_train)),y_train, label='Train')
+plt.plot(range(len(y_train),len(y)),y_test,label='Test')
+plt.legend()
+plt.show()
+
+
+import warnings
+from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import LogisticRegression
+
+# Load your data
+def load_data():
+    X=((1,2),(3,4),(5,6))
+    y=(0,1,0)
+    return X,y
+X,y=load_data()
+
+# Create a logistic regression model
+model = LogisticRegression()
+
+# Fit the model
+with warnings.catch_warnings():
+    warnings.filterwarnings("error", category=ConvergenceWarning)
+    try:
+        model.fit(X, y)
+    except ConvergenceWarning:
+        print("ConvergenceWarning: Maximum number of iterations exceeded")
+
+# Evaluate the model
+score = model.score(X, y)
+print("Model score:", score)
+
+
+
+import numpy as np
+import pandas as pd
+import yfinance as yf
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+
+#load data from yfinance
+google = yf.Ticker("GOOG")
+df = google.history(period='1d', interval="1m")
+df=df[['Low']]
+
+#Extract features and target variable
+X=np.arange(len(df)).reshape(-1,1)
+y=df['Low'].values
+X_train,X_test,y_train,y_test=train_test_split(X,y,test_size=0.1,shuffle=False)
+
+# Create a logistic regression model
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+# Evaluate the model
+score = model.score(X, y)
+print("Model score:", score)
+
+#Make predictions
+predictions=model.predict(X_test)
+
+print(f'Real data for time 0: {y_train[-1]}')
+print(f'Real data for time 1: {y_test[0]}')
+forecast = model.predict(X_test[0].reshape(1,-1))[0]
+print(f'Predicted data for time 1: {forecast}')
